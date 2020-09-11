@@ -13,7 +13,9 @@ services:
       MINIO_SECRET_KEY: SCALAINAWEEK
 
   postgres:
-    image: postgres
+    build:
+      context: ./postgres
+      dockerfile: Dockerfile
     ports:
       - 5432:5432
     environment:
