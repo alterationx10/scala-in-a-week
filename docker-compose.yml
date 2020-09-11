@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+
+  s3:
+    image: minio/minio
+    command: ["minio", "server", "/data"]
+    ports: 
+      - 9000:9000
+    environment:
+      MINIO_ACCESS_KEY: SCALAINAWEEK
+      MINIO_SECRET_KEY: SCALAINAWEEK
+
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: scala
+      POSTGRES_PASSWORD: scalainaweek
+      POSTGRES_DB: scala
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 15672:15672
+      - 5672:5672
+    environment:
+      RABBITMQ_DEFAULT_USER: scala
+      RABBITMQ_DEFAULT_PASS: inaweek
+
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
