@@ -1,18 +1,12 @@
 import { Router } from "express";
-import * as Minio from 'minio';
-import { config } from "../../../config/config";
+import { MinioService } from '../../../services/minio/minio';
+import { redisClient } from '../../../services/redis/redis';
 
-var minioClient = new Minio.Client({
-    endPoint: config.S3_ENDPOINT,
-    port: config.S3_PORT as number,
-    useSSL: false,
-    accessKey: config.S3_ACCESS_KEY,
-    secretKey: config.S3_SECRET_KEY
-});
+const minioService = new MinioService();
 
 function getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
-  }
+}
 
 export function apiImages(app: Router) {
 
@@ -21,21 +15,10 @@ export function apiImages(app: Router) {
      * S3 photos bucket
      */
     app.get('/api/images', async (req, res) => {
-
-        const files: Minio.BucketItem[] = [];
-        const loStream = minioClient.listObjects('photos');
-        loStream.on('data', (data: Minio.BucketItem) => {
-            files.push(data);
-        })
-        .on('error', (error) => {
-            res.status(500).send(error);
-        })
-        .on('end', async () => {
-            res.send(files);
-        })
-        .on('close', () => {
-            // closing stream... hopefully it ended first!
-        });
+        
+        minioService.bucketList('photos')
+        .then( (data) => res.send(data))
+        .catch( (error) => res.status(500).send(error));
 
     });
 
@@ -44,31 +27,25 @@ export function apiImages(app: Router) {
      */
     app.get('/api/images/random', async (req, res) => {
 
-        const files: Minio.BucketItem[] = [];
-        const loStream = minioClient.listObjects('photos');
-        loStream.on('data', (data: Minio.BucketItem) => {
-            files.push(data);
-        })
-        .on('error', (error) => {
-            res.status(500).send(error);
-        })
-        .on('end', async () => {
-            const ranomFile = files[getRandomInt(files.length)];
+        minioService.bucketList('photos')
+        .then( (data)  => {
+            const ranomFile = data[getRandomInt(data.length)];
             res.redirect(`/api/image/${ranomFile.name}`);
         })
-        .on('close', () => {
-            // closing stream... hopefully it ended first!
-        });
+        .catch( (error) => res.status(500).send(error));
 
     });
 
     /**
      * Serve an image from our S3 photos bucket
      */
-    app.get('/api/image/:id', async (reg, res) => {
+    app.get('/api/image/:id', async (req, res) => {
         try {
-            (await minioClient.getObject('photos', reg.params['id'])).pipe(res);
-        } catch  (e) {
+            const id = req.params['id'];
+            // Every time we view an image, increase the stats!
+            redisClient.HINCRBY(id, 'views', 1);
+            (await minioService.minioClient.getObject('photos', id)).pipe(res);
+        } catch (e) {
             res.status(404).send(e);
         }
     });
