@@ -4,6 +4,7 @@ const {
     S3_PORT = 9000,
     S3_ACCESS_KEY = 'SCALAINAWEEK',
     S3_SECRET_KEY = 'SCALAINAWEEK',
+    REDIS_HOST = 'localhost'
 } = process.env;
 
 export const config  = {
@@ -12,4 +13,5 @@ export const config  = {
     S3_PORT,
     S3_ACCESS_KEY,
     S3_SECRET_KEY,
+    REDIS_HOST,
 }
