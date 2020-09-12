@@ -2,10 +2,9 @@ import { Router } from "express";
 import { BucketItem } from "minio";
 import { MinioService } from "../../../services/minio/minio";
 import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
-import { redisClient, RedisService } from "../../../services/redis/redis";
+import { RedisService } from "../../../services/redis/redis";
 
 const minioService = new MinioService();
-const redisService = new RedisService();
 
 export function apiStats(app: Router) {
 
@@ -14,8 +13,8 @@ export function apiStats(app: Router) {
         .then( async (data: BucketItem[]) => {            
             const result: any[] = [];
             for (const thing of data) {
-                const views = await redisService.hgetInt(thing.name, 'views');
-                const likes = await redisService.hgetInt(thing.name, 'likes');;
+                const views = await RedisService.hgetInt(thing.name, 'views');
+                const likes = await RedisService.hgetInt(thing.name, 'likes');;
                 result.push({id: thing.name, views, likes});
             }
             res.send(result);
@@ -25,15 +24,15 @@ export function apiStats(app: Router) {
 
     app.get('/api/stats/:id', async (req, res) => {
         const id = req.params['id'];
-        const views = await redisService.hgetInt(id, 'views');
-        const likes = await redisService.hgetInt(id, 'likes');;
+        const views = await RedisService.hgetInt(id, 'views');
+        const likes = await RedisService.hgetInt(id, 'likes');;
         res.send({id, views, likes});
     });
 
     app.post('api/like/:id', async (req, res) => {
         try  {
             const id = req.params['id'];
-            redisClient.hincrby(id, 'likes', 1);
+            RedisService.redisClient.hincrby(id, 'likes', 1);
             // Now send an event that the stats for an ID has changed!
             await RabbitMQService.publishStat(id);
             res.status(200).send();

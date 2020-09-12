@@ -4,7 +4,6 @@ import { RedisService } from "../redis/redis";
 import * as WebSocket from "ws";
 
 export namespace RabbitMQService {
-  const redisService = new RedisService();
   const _url = `amqp://${config.AMQP_USER}:${config.AMQP_PASSWORD}@${config.AMQP_HOST}:${config.AMQP_PORT}`;
   const _EXCHANGE = "scalathisweek";
   var _channel: AMQP.Channel | undefined;
@@ -24,8 +23,8 @@ export namespace RabbitMQService {
 
   export async function publishStat(id: string, routing: string = "") {
     if (_channel) {
-      const views = await redisService.hgetInt(id, "views");
-      const likes = await redisService.hgetInt(id, "likes");
+      const views = await RedisService.hgetInt(id, "views");
+      const likes = await RedisService.hgetInt(id, "likes");
       const msg = JSON.stringify({ id, views, likes });
       _channel.publish(_EXCHANGE, routing, Buffer.from(msg));
     } else {
