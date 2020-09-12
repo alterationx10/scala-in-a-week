@@ -7,8 +7,11 @@ import { rootRoutes } from "./controllers/root/routes";
 import { apiImages } from "./controllers/api/images/routes";
 import { apiStats } from "./controllers/api/stats/routes";
 import { RabbitMQService } from "./services/rabbitmq/rabbitmq";
+import bodyParser from "body-parser";
 
 const app = express();
+
+app.use(bodyParser.text());
 
 healthRoutes(app);
 rootRoutes(app);

@@ -1,5 +1,4 @@
 import * as redis from "redis";
-import { RedisClient } from "redis";
 import { config } from "../../config/config";
 
 export namespace RedisService {

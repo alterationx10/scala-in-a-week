@@ -78,7 +78,12 @@ export function apiImages(app: Router) {
     app.post('/api/images/:id/comments', async (req, res) => {
         try  {
             const id = req.params['id'];
-            // TODO store comments in Postgres
+            const comment: PgComment = {
+                imageId: id,
+                comment: req.body
+            }
+            console.log(`saving ${comment}`);
+            await PostgresService.postComment(comment);
             await RabbitMQService.publishStat(id);
             res.status(200).send();
         } catch (e) {

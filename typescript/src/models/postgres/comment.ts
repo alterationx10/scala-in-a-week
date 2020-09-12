@@ -1,5 +1,5 @@
 interface PgComment {
-    id: number;
-    fileId: string;
+    id?: number;
+    imageId?: string;
     comment?: string;
 }
