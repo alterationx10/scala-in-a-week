@@ -4,12 +4,11 @@ import { MinioService } from "../../../services/minio/minio";
 import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
 import { RedisService } from "../../../services/redis/redis";
 
-const minioService = new MinioService();
 
 export function apiStats(app: Router) {
 
     app.get('/api/stats', (req, res) => {
-        minioService.bucketList('photos')
+        MinioService.bucketList('photos')
         .then( async (data: BucketItem[]) => {            
             const result: any[] = [];
             for (const thing of data) {
