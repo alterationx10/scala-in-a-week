@@ -10,6 +10,10 @@ export class RedisService {
     redisClient: RedisClient = redisClient;
     RedisService(){};
 
+    newClient = () => redis.createClient({
+        host: config.REDIS_HOST
+    });
+
     hgetInt(key: string, field: string, _default: number = 0): Promise<number>  {
         return new Promise(function(resolve, _) {
             redisClient.hget(key, field, (_, str) => {

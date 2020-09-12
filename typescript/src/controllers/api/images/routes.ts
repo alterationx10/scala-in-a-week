@@ -44,6 +44,8 @@ export function apiImages(app: Router) {
             const id = req.params['id'];
             // Every time we view an image, increase the stats!
             redisClient.HINCRBY(id, 'views', 1);
+            // Now send an event that the stats for an ID has changed!
+            redisClient.publish('stats', id);
             (await minioService.minioClient.getObject('photos', id)).pipe(res);
         } catch (e) {
             res.status(404).send(e);

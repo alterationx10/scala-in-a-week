@@ -33,6 +33,8 @@ export function apiStats(app: Router) {
         try  {
             const id = req.params['id'];
             redisClient.hincrby(id, 'likes', 1);
+            // Now send an event that the stats for an ID has changed!
+            redisClient.publish('stats', id);
             res.status(200).send();
         } catch (e) {
             res.status(500).send(e);
