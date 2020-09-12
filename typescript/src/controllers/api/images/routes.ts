@@ -52,4 +52,27 @@ export function apiImages(app: Router) {
         }
     });
 
+    app.post('api/images/:id/like', async (req, res) => {
+        try  {
+            const id = req.params['id'];
+            RedisService.redisClient.hincrby(id, 'likes', 1);
+            // Now send an event that the stats for an ID has changed!
+            await RabbitMQService.publishStat(id);
+            res.status(200).send();
+        } catch (e) {
+            res.status(500).send(e);
+        }
+    });
+
+    app.post('api/images/:id/comment', async (req, res) => {
+        try  {
+            const id = req.params['id'];
+            // TODO store comments in Postgres
+            // await RabbitMQService.publishStat(id);
+            res.status(200).send();
+        } catch (e) {
+            res.status(500).send(e);
+        }
+    });
+
 }
