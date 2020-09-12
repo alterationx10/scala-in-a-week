@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { BucketItem } from "minio";
 import { MinioService } from "../../../services/minio/minio";
+import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
 import { redisClient, RedisService } from "../../../services/redis/redis";
 
 const minioService = new MinioService();
@@ -29,12 +30,12 @@ export function apiStats(app: Router) {
         res.send({id, views, likes});
     });
 
-    app.post('api/like/:id', (req, res) => {
+    app.post('api/like/:id', async (req, res) => {
         try  {
             const id = req.params['id'];
             redisClient.hincrby(id, 'likes', 1);
             // Now send an event that the stats for an ID has changed!
-            redisClient.publish('stats', id);
+            await RabbitMQService.publishStat(id);
             res.status(200).send();
         } catch (e) {
             res.status(500).send(e);

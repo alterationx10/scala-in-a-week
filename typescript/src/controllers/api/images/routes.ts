@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { MinioService } from '../../../services/minio/minio';
+import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
 import { redisClient } from '../../../services/redis/redis';
 
 const minioService = new MinioService();
@@ -45,7 +46,7 @@ export function apiImages(app: Router) {
             // Every time we view an image, increase the stats!
             redisClient.HINCRBY(id, 'views', 1);
             // Now send an event that the stats for an ID has changed!
-            redisClient.publish('stats', id);
+            await RabbitMQService.publishStat(id);
             (await minioService.minioClient.getObject('photos', id)).pipe(res);
         } catch (e) {
             res.status(404).send(e);
