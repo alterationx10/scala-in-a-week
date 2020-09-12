@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { MinioService } from '../../../services/minio/minio';
+import { PostgresService } from "../../../services/postgres/postgres";
 import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
 import { RedisService } from "../../../services/redis/redis";
 
@@ -30,7 +31,7 @@ export function apiImages(app: Router) {
         MinioService.bucketList('photos')
         .then( (data)  => {
             const ranomFile = data[getRandomInt(data.length)];
-            res.redirect(`/api/image/${ranomFile.name}`);
+            res.redirect(`/api/images/${ranomFile.name}`);
         })
         .catch( (error) => res.status(500).send(error));
 
@@ -39,7 +40,7 @@ export function apiImages(app: Router) {
     /**
      * Serve an image from our S3 photos bucket
      */
-    app.get('/api/image/:id', async (req, res) => {
+    app.get('/api/images/:id', async (req, res) => {
         try {
             const id = req.params['id'];
             // Every time we view an image, increase the stats!
@@ -52,7 +53,7 @@ export function apiImages(app: Router) {
         }
     });
 
-    app.post('api/images/:id/like', async (req, res) => {
+    app.post('/api/images/:id/like', async (req, res) => {
         try  {
             const id = req.params['id'];
             RedisService.redisClient.hincrby(id, 'likes', 1);
@@ -64,11 +65,21 @@ export function apiImages(app: Router) {
         }
     });
 
-    app.post('api/images/:id/comment', async (req, res) => {
+    app.get('/api/images/:id/comments', async (req, res) => {
+        try  {
+            const id = req.params['id'];
+            const comments = await PostgresService.getComments(id);
+            res.status(200).send(comments);
+        } catch (e) {
+            res.status(500).send(e);
+        }
+    });
+
+    app.post('/api/images/:id/comments', async (req, res) => {
         try  {
             const id = req.params['id'];
             // TODO store comments in Postgres
-            // await RabbitMQService.publishStat(id);
+            await RabbitMQService.publishStat(id);
             res.status(200).send();
         } catch (e) {
             res.status(500).send(e);

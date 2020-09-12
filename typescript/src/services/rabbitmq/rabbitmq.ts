@@ -2,6 +2,7 @@ import * as AMQP from "amqplib/callback_api";
 import { config } from "../../config/config";
 import { RedisService } from "../redis/redis";
 import * as WebSocket from "ws";
+import { PostgresService } from "../postgres/postgres";
 
 export namespace RabbitMQService {
   const _url = `amqp://${config.AMQP_USER}:${config.AMQP_PASSWORD}@${config.AMQP_HOST}:${config.AMQP_PORT}`;
@@ -25,7 +26,8 @@ export namespace RabbitMQService {
     if (_channel) {
       const views = await RedisService.hgetInt(id, "views");
       const likes = await RedisService.hgetInt(id, "likes");
-      const msg = JSON.stringify({ id, views, likes });
+      const comments = await PostgresService.getCommentCount(id);
+      const msg = JSON.stringify({ id, views, likes, comments });
       _channel.publish(_EXCHANGE, routing, Buffer.from(msg));
     } else {
       console.warn("RMQ Channel is undefined!");

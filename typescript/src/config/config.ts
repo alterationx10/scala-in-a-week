@@ -8,7 +8,12 @@ const {
     AMQP_HOST = 'localhost',
     AMQP_PORT = 5672,
     AMQP_USER = 'scala',
-    AMQP_PASSWORD = 'inaweek'
+    AMQP_PASSWORD = 'inaweek',
+    PG_HOST = 'localhost',
+    PG_PORT = 5432,
+    PG_USER = 'scala',
+    PG_PASS = 'scalainaweek',
+    PG_DB = 'scala',
 } = process.env;
 
 export const config  = {
@@ -22,4 +27,9 @@ export const config  = {
     AMQP_PORT,
     AMQP_USER,
     AMQP_PASSWORD,
+    PG_HOST,
+    PG_PORT,
+    PG_USER,
+    PG_PASS,
+    PG_DB,
 }
