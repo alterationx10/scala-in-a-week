@@ -1,5 +1,5 @@
 const {
-    EXPRESS_PORT = 3000,
+    EXPRESS_PORT = 3001,
     S3_ENDPOINT = 'localhost',
     S3_PORT = 9000,
     S3_ACCESS_KEY = 'SCALAINAWEEK',

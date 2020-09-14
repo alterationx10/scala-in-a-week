@@ -8,9 +8,10 @@ import { apiImages } from "./controllers/api/images/routes";
 import { apiStats } from "./controllers/api/stats/routes";
 import { RabbitMQService } from "./services/rabbitmq/rabbitmq";
 import bodyParser from "body-parser";
+import cors from 'cors';
 
 const app = express();
-
+app.use(cors());
 app.use(bodyParser.text());
 
 healthRoutes(app);
