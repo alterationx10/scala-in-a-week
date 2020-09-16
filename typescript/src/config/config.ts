@@ -1,3 +1,7 @@
+/**
+ * We assign some default values to our config parameters,
+ * which will be overwritten by any set in process.env
+ */
 const {
     EXPRESS_PORT = 3001,
     S3_ENDPOINT = 'localhost',
@@ -16,6 +20,9 @@ const {
     PG_DB = 'scala',
 } = process.env;
 
+/**
+ * We make an object holding default values for our config
+ */
 export const config  = {
     EXPRESS_PORT,
     S3_ENDPOINT,

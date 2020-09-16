@@ -4,11 +4,18 @@ import { PostgresService } from "../../../services/postgres/postgres";
 import { RabbitMQService } from "../../../services/rabbitmq/rabbitmq";
 import { RedisService } from "../../../services/redis/redis";
 
-
+/**
+ * Helper generatee a random number between 0 and max
+ * @param max 
+ */
 function getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
+/**
+ * A collection of endpoints to interact with our photos
+ * @param app The express app to add the enpoints to
+ */
 export function apiImages(app: Router) {
 
     /**
@@ -53,9 +60,13 @@ export function apiImages(app: Router) {
         }
     });
 
+    /**
+     * Like and image
+     */
     app.post('/api/images/:id/like', async (req, res) => {
         try  {
             const id = req.params['id'];
+            // Increment out Like counteer
             RedisService.redisClient.hincrby(id, 'likes', 1);
             // Now send an event that the stats for an ID has changed!
             await RabbitMQService.publishStat(id);
@@ -65,6 +76,9 @@ export function apiImages(app: Router) {
         }
     });
 
+    /**
+     * return an array of comments about a specific image
+     */
     app.get('/api/images/:id/comments', async (req, res) => {
         try  {
             const id = req.params['id'];
@@ -75,15 +89,21 @@ export function apiImages(app: Router) {
         }
     });
 
+    /**
+     * Submit a comment about a specific picture - 
+     * needs Content-Header: text/plain
+     */
     app.post('/api/images/:id/comments', async (req, res) => {
         try  {
             const id = req.params['id'];
+            // Parse a plain-text comment from therequest body
             const comment: PgComment = {
                 imageId: id,
                 comment: req.body
             }
-            console.log(`saving ${comment}`);
+            // Store our comment
             await PostgresService.postComment(comment);
+            // Now send an event that the stats for an ID has changed!
             await RabbitMQService.publishStat(id);
             res.status(200).send();
         } catch (e) {

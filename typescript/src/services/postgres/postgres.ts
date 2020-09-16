@@ -1,7 +1,15 @@
 import { Client, Pool } from "pg";
 import { config } from "../../config/config";
 
+/**
+ * A Postgres namesapce to act as a Singleton access to out client connection pool,
+ * along with some helper functions.
+ */
 export namespace PostgresService {
+
+  /**
+   * A configured connection Pool
+   */
   export const pool = new Pool({
     host: config.PG_HOST,
     port: config.PG_PORT as number,
@@ -13,6 +21,10 @@ export namespace PostgresService {
     connectionTimeoutMillis: 2000,
   });
 
+  /**
+   * Get the comment count for a particual image by it's id
+   * @param id imageId
+   */
   export async function getCommentCount(id: string): Promise<number> {
     const client = await pool.connect();
     const resultSet = await client.query(
@@ -27,6 +39,11 @@ export namespace PostgresService {
     }
   }
 
+  /**
+   * Get the comments for a particular image by it's id.
+   * Rows with null comment fields aree not returned.
+   * @param id  imageId
+   */
   export async function getComments(id: string): Promise<PgComment[]> {
     const client = await pool.connect();
     const resultSet = await client.query(
@@ -37,6 +54,10 @@ export namespace PostgresService {
     return resultSet.rows as PgComment[];
   }
 
+  /**
+   * Store a new commeent about an image.
+   * @param comment The PGComment comment to store
+   */
   export async function postComment(comment: PgComment): Promise<void> {
     const client = await pool.connect();
     await client.query(
