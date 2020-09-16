@@ -1,6 +1,8 @@
 Scala In A Week
 ===============
 
+## Still currently a work in progress!
+
 An example project showing that Scala isn't some scary language, and that
 any team can pick it up quickly!
 
