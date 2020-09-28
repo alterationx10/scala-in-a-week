@@ -34,7 +34,7 @@ function App() {
   const [ logoId, setLogoId ] = useState('');
   const [ logoUrl, setLogoUrl ] = useState('./scala.svg');
   const [ stats, setStats ] = useState(emptyStats);
-
+  const [ liveStat, setLiveStat ] = useState(emptyStats);
 
   useEffect(() => {
     if (logoId) {
@@ -68,6 +68,13 @@ function App() {
     }
   }
 
+  // Update our view stats, if the last live message is related
+  useEffect(() => {
+    if (logoId && logoId === liveStat.id) {
+      setStats(liveStat);
+    }
+  }, [logoId, liveStat]);
+
   let ws = new WebSocket('ws://localhost:3001');
   const reconnect = () => {
     ws = new WebSocket('ws://localhost:3001');
@@ -78,10 +85,8 @@ function App() {
     }
     ws.onmessage = (event) => {
       const stat = JSON.parse(event.data) as Stat;
-      console.log(stat);
-      if (logoId && logoId === stat.id) {
-        setStats(stat);
-      }
+      console.log(stat);    
+      setLiveStat(stat);
     };
     ws.onclose = () => {
       console.log('ws disconnected');
